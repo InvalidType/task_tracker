@@ -4,12 +4,14 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final void Function(String)? onSubmitted;
+  final String? errorText;
 
   const CustomTextField({
     super.key,
     required this.controller,
     required this.hintText,
     this.onSubmitted,
+    this.errorText
   });
 
   @override
@@ -18,6 +20,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
+        errorText: errorText,
         hintText: hintText,
         filled: true,
         fillColor: Colors.grey[100],

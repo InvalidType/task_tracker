@@ -11,14 +11,22 @@ class TaskScreen extends StatefulWidget {
 
 class _TaskScreenState extends State<TaskScreen> {
   final List<String> _tasks = []; // список задач
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController(); // чтобы вытащить текст из поля
+  String? _errorMessage; // текст для валидации(простой)
+  final _listKey = GlobalKey<AnimatedListState>(); // ключ для управления виджетом анимелист(лист с анимками)
 
   void _addTask() {
     if (_controller.text.trim().isNotEmpty) {
       setState(() {
         _tasks.add(_controller.text.trim());
         _controller.clear();
+        _errorMessage = null;
       });
+    } else {
+      setState(() {
+        _errorMessage = 'Введите задачу';
+      });
+
     }
   }
 
@@ -39,6 +47,7 @@ class _TaskScreenState extends State<TaskScreen> {
             child: CustomTextField(
               controller: _controller,
               hintText: 'Введите задачу',
+              errorText: _errorMessage,
               onSubmitted: (value) => _addTask(),
             ),
           ),
