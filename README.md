@@ -1,6 +1,5 @@
 # task_tracker
-
-A new Flutter project.
+Application for monitoring, adding and deleting tasks
 
 ## Getting Started
 
