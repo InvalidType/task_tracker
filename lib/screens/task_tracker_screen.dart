@@ -5,6 +5,7 @@ import '../models/task.dart';
 import '../widgets/custom_task_form_dialog.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_elevated_button.dart';
+import '../widgets/task_card.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
@@ -33,9 +34,7 @@ class _TaskScreenState extends State<TaskScreen> {
     final String? jsonString = prefs.getString('tasks');
     if (jsonString != null) {
       final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
-      final List<Task> tasks = jsonList
-          .map((e) => Task.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final List<Task> tasks = jsonList.map((e) => Task.fromJson(e as Map<String, dynamic>)).toList();
       setState(() {
         _tasks = tasks;
       });
@@ -50,10 +49,7 @@ class _TaskScreenState extends State<TaskScreen> {
   }
 
   Future<void> _showAddTaskDialog() async {
-    final Task? newTask = await showDialog<Task>(
-      context: context,
-      builder: (context) => const TaskFormDialog(),
-    );
+    final Task? newTask = await showDialog<Task>(context: context, builder: (context) => const TaskFormDialog());
 
     if (newTask != null) {
       setState(() {
@@ -77,33 +73,20 @@ class _TaskScreenState extends State<TaskScreen> {
       body: Column(
         children: [
           Expanded(
-            child: _tasks.isEmpty
-                ? const Center(child: Text('Список задач пуст'))
-                : ListView.builder(
-              itemCount: _tasks.length,
-              itemBuilder: (context, index) {
-                final task = _tasks[index];
-                return ListTile(
-                  title: Text(task.title),
-                  subtitle: Text(
-                '${task.category}${task.dueDate != null
-                    ? ' • ${task.dueDate!.toLocal().day}.${task.dueDate!.toLocal().month}.${task.dueDate!.toLocal().year}'
-                    : ''}',
-                ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteTask(index),
-                  ),
-                );
-              },
-            ),
+            child:
+                _tasks.isEmpty
+                    ? const Center(child: Text('Список задач пуст'))
+                    : ListView.builder(
+                      itemCount: _tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = _tasks[index];
+                        return TaskCard(task: _tasks[index], onDelete: () => _deleteTask(index));
+                      },
+                    ),
           ),
         ],
       ),
-      floatingActionButton: CustomElevatedButton(
-        onPressed: _showAddTaskDialog,
-        icon: Icons.add,
-      ),
+      floatingActionButton: CustomElevatedButton(onPressed: _showAddTaskDialog, icon: Icons.add),
     );
   }
 }
