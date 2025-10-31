@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // ← для jsonEncode/jsonDecode
 import '../models/task.dart';
+import '../widgets/custom_task_form_dialog.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_elevated_button.dart';
 
@@ -48,22 +49,18 @@ class _TaskScreenState extends State<TaskScreen> {
     await prefs.setString('tasks', jsonString);
   }
 
-  void _addTask() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) {
+  Future<void> _showAddTaskDialog() async {
+    final Task? newTask = await showDialog<Task>(
+      context: context,
+      builder: (context) => const TaskFormDialog(),
+    );
+
+    if (newTask != null) {
       setState(() {
-        _errorMessage = 'Введите задачу';
+        _tasks.add(newTask);
       });
-      return;
+      _saveTasks();
     }
-
-    setState(() {
-      _errorMessage = null;
-      _tasks.add(Task(text, _selectedCategory));
-    });
-
-    _controller.clear();
-    _saveTasks();
   }
 
   void _deleteTask(int index) {
@@ -79,33 +76,6 @@ class _TaskScreenState extends State<TaskScreen> {
       appBar: AppBar(title: const Text('Мои задачи')),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              items: _categories.map((category) {
-                return DropdownMenuItem(value: category, child: Text(category));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                });
-              },
-              decoration: const InputDecoration(
-                labelText: 'Категория',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CustomTextField(
-              controller: _controller,
-              hintText: 'Введите задачу',
-              errorText: _errorMessage,
-              onSubmitted: (value) => _addTask(),
-            ),
-          ),
           Expanded(
             child: _tasks.isEmpty
                 ? const Center(child: Text('Список задач пуст'))
@@ -115,7 +85,11 @@ class _TaskScreenState extends State<TaskScreen> {
                 final task = _tasks[index];
                 return ListTile(
                   title: Text(task.title),
-                  subtitle: Text(task.category),
+                  subtitle: Text(
+                '${task.category}${task.dueDate != null
+                    ? ' • ${task.dueDate!.toLocal().day}.${task.dueDate!.toLocal().month}.${task.dueDate!.toLocal().year}'
+                    : ''}',
+                ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () => _deleteTask(index),
@@ -127,7 +101,7 @@ class _TaskScreenState extends State<TaskScreen> {
         ],
       ),
       floatingActionButton: CustomElevatedButton(
-        onPressed: _addTask,
+        onPressed: _showAddTaskDialog,
         icon: Icons.add,
       ),
     );

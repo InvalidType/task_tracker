@@ -1,22 +1,24 @@
 class Task {
-  final String title; // описание задачи и ее же название (в будущем мб разделю мб нет)
+  final String title; // название задачи
   final String category; // категория задачи
+  final DateTime? dueDate; // срок выполнения задачи может быть null
 
-  Task(this.title, this.category);
+  Task(this.title, this.category, {this.dueDate});
 
-  // Преобразует объект в JSON-совместимый Map
   Map<String, dynamic> toJson() {
     return {
       'title': title,
       'category': category,
+      'dueDate': dueDate?.toIso8601String(), // DateTime → String
     };
   }
 
-  // Создаёт объект из JSON
   static Task fromJson(Map<String, dynamic> json) {
+    final dueDateString = json['dueDate'] as String?;
     return Task(
       json['title'] as String,
       json['category'] as String,
+      dueDate: dueDateString != null ? DateTime.parse(dueDateString) : null,
     );
   }
 }
